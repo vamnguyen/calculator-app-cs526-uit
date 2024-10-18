@@ -1,96 +1,53 @@
 import * as React from "react";
 import Button from "./Button";
-import { View, Text } from "react-native";
+import { View, Text, Alert } from "react-native";
 import { Styles } from "../styles/GlobalStyles";
 import { myColors } from "../styles/Colors";
 
 export default function MyKeyboard() {
-  const [firstNumber, setFirstNumber] = React.useState("");
-  const [secondNumber, setSecondNumber] = React.useState("");
-  const [operation, setOperation] = React.useState("");
-  const [result, setResult] = React.useState<Number | null>(null);
+  const [expression, setExpression] = React.useState("");
+  const [currentNumber, setCurrentNumber] = React.useState("0");
+  const [result, setResult] = React.useState<string | null>(null);
 
-  const handleNumberPress = (buttonValue: string) => {
-    if (firstNumber.length < 10) {
-      setFirstNumber(firstNumber + buttonValue);
+  const handleNumberPress = (number: string) => {
+    if (expression.length < 20) {
+      setExpression(expression + number);
+      result ?? setCurrentNumber(number);
     }
   };
 
-  const handleOperationPress = (buttonValue: string) => {
-    setOperation(buttonValue);
-    setSecondNumber(firstNumber);
-    setFirstNumber("");
+  const handleOperationPress = (operation: string) => {
+    if (operation === "+/-") {
+      if (!result) {
+        Alert.alert("Invalid operation", "Please calculate the result first");
+      }
+      setResult((prev) => (Number(prev) * -1).toString()); // Change the sign of the number
+    } else if (expression.endsWith("=")) {
+      setExpression(result + " " + operation + " ");
+    } else if (expression !== "") {
+      setExpression(expression + " " + operation + " ");
+    }
   };
 
   const clear = () => {
-    setFirstNumber("");
-    setSecondNumber("");
-    setOperation("");
+    setExpression("");
+    setCurrentNumber("0");
     setResult(null);
   };
 
-  const firstNumberDisplay = () => {
-    if (result !== null) {
-      return (
-        <Text
-          style={
-            Number(result) < 99999
-              ? [Styles.screenFirstNumber, { color: myColors.result }]
-              : [
-                  Styles.screenFirstNumber,
-                  { fontSize: 50, color: myColors.result },
-                ]
-          }
-        >
-          {result?.toString()}
-        </Text>
-      );
-    }
-    if (firstNumber && firstNumber.length < 6) {
-      return <Text style={Styles.screenFirstNumber}>{firstNumber}</Text>;
-    }
-    if (firstNumber === "") {
-      return <Text style={Styles.screenFirstNumber}>{"0"}</Text>;
-    }
-    if (firstNumber.length > 5 && firstNumber.length < 8) {
-      return (
-        <Text style={[Styles.screenFirstNumber, { fontSize: 70 }]}>
-          {firstNumber}
-        </Text>
-      );
-    }
-    if (firstNumber.length > 7) {
-      return (
-        <Text style={[Styles.screenFirstNumber, { fontSize: 50 }]}>
-          {firstNumber}
-        </Text>
-      );
-    }
+  const getResult = () => {
+    setResult(eval(expression));
+    setCurrentNumber("");
+    // Display the complete expression with the equal sign
+    setExpression(expression + " =");
   };
 
-  const getResult = () => {
-    switch (operation) {
-      case "+":
-        clear();
-        setResult(parseInt(secondNumber) + parseInt(firstNumber));
-        break;
-      case "-":
-        clear();
-        setResult(parseInt(secondNumber) - parseInt(firstNumber));
-        break;
-      case "*":
-        clear();
-        setResult(parseInt(secondNumber) * parseInt(firstNumber));
-        break;
-      case "/":
-        clear();
-        setResult(parseInt(secondNumber) / parseInt(firstNumber));
-        break;
-      default:
-        clear();
-        setResult(0);
-        break;
-    }
+  const displayExpression = () => {
+    return (
+      <Text style={[Styles.calculationText, { color: myColors.gray }]}>
+        {expression}
+      </Text>
+    );
   };
 
   return (
@@ -103,14 +60,34 @@ export default function MyKeyboard() {
           alignSelf: "center",
         }}
       >
-        <Text style={Styles.screenSecondNumber}>
-          {secondNumber}
-          <Text style={{ color: "purple", fontSize: 50, fontWeight: "500" }}>
-            {operation}
-          </Text>
+        {expression ? displayExpression() : null}
+
+        <Text style={[Styles.resultNumber, { color: myColors.result }]}>
+          {/* Display the result */}
+          {result ?? (
+            <Text
+              style={{
+                fontSize: 96,
+                color: myColors.result,
+                fontWeight: "500",
+              }}
+            >
+              {result}
+            </Text>
+          )}
+
+          {/* Display the result of current expression */}
+          {!result && expression && !expression.endsWith(" ") ? (
+            <Text style={Styles.resultNumber}>{eval(expression)}</Text>
+          ) : (
+            currentNumber && (
+              <Text style={Styles.resultNumber}>{currentNumber}</Text>
+            )
+          )}
         </Text>
-        {firstNumberDisplay()}
       </View>
+
+      {/* Buttons layout */}
       <View style={Styles.row}>
         <Button title="C" isGray onPress={clear} />
         <Button
@@ -144,7 +121,7 @@ export default function MyKeyboard() {
         <Button title="0" onPress={() => handleNumberPress("0")} />
         <Button
           title="⌫"
-          onPress={() => setFirstNumber(firstNumber.slice(0, -1))}
+          onPress={() => setExpression(expression.slice(0, -1))}
         />
         <Button title="=" isBlue onPress={() => getResult()} />
       </View>
