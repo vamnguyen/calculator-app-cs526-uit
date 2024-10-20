@@ -7,12 +7,20 @@ import { operationButtons, numberButtons } from "../constants";
 
 export default function MyKeyboard() {
   const [expression, setExpression] = React.useState("");
+  console.log("🚀 ~ MyKeyboard ~ expression:", expression);
   const [currentNumber, setCurrentNumber] = React.useState("0");
   const [result, setResult] = React.useState<string | null>(null);
 
   const handleNumberPress = (number: string) => {
-    setExpression(expression + number);
-    result ?? setCurrentNumber(number);
+    if (expression.endsWith("=")) {
+      // If the expression ends with "=", clear the expression and start a new one
+      setExpression(number);
+    } else {
+      setExpression(expression + number);
+
+      // Handle the case result is null or undefined, display the current number
+      result ?? setCurrentNumber(number);
+    }
   };
 
   const handleOperationPress = (operation: string) => {
@@ -78,9 +86,13 @@ export default function MyKeyboard() {
   };
 
   const getResult = () => {
-    if (expression.endsWith("=") && result) {
+    if (!expression) {
+      Alert.alert("Invalid operation", "Please enter an expression first");
+      return;
+    } else if (expression.endsWith("=") && result) {
       return;
     }
+
     setResult(eval(expression));
     setCurrentNumber("");
     // Display the complete expression with the equal sign
