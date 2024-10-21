@@ -3,11 +3,10 @@ import Button from "./Button";
 import { View, Text, Alert } from "react-native";
 import { Styles } from "../styles/GlobalStyles";
 import { myColors } from "../styles/Colors";
-import { operationButtons, numberButtons } from "../constants";
+import { numberButtons } from "../constants";
 
 export default function MyKeyboard() {
   const [expression, setExpression] = React.useState("");
-  console.log("🚀 ~ MyKeyboard ~ expression:", expression);
   const [currentNumber, setCurrentNumber] = React.useState("0");
   const [result, setResult] = React.useState<string | null>(null);
 
@@ -17,9 +16,6 @@ export default function MyKeyboard() {
       setExpression(number);
     } else {
       setExpression(expression + number);
-
-      // Handle the case result is null or undefined, display the current number
-      result ?? setCurrentNumber(number);
     }
   };
 
@@ -31,15 +27,6 @@ export default function MyKeyboard() {
         } else {
           setResult((prev) => (Number(prev) * -1).toString()); // Change the sign of the number
         }
-        break;
-
-      case "=":
-        if (expression.endsWith("=") && result) {
-          return;
-        }
-        setResult(eval(expression)); // Calculate the result
-        setCurrentNumber(""); // Clear the current number
-        setExpression(expression + " ="); // Display the full expression with "="
         break;
 
       case "％":
@@ -73,6 +60,21 @@ export default function MyKeyboard() {
           // Last expression is a number
           setExpression(expression + ".");
         }
+        break;
+
+      case "⌫":
+        if (expression.endsWith(" ")) {
+          // If the expression ends with an operator followed by a space, remove the last 3 characters (operator and spaces)
+          setExpression(expression.slice(0, -3));
+        } else {
+          // Otherwise, remove the last character
+          setExpression(expression.slice(0, -1));
+        }
+
+        // If the expression becomes empty, reset the current number to "0"
+        if (expression.length <= 1) {
+          clear();
+        }
 
       default:
         break;
@@ -86,17 +88,43 @@ export default function MyKeyboard() {
   };
 
   const getResult = () => {
+    // Check if expression is empty
     if (!expression) {
       Alert.alert("Invalid operation", "Please enter an expression first");
       return;
-    } else if (expression.endsWith("=") && result) {
+    }
+
+    // Check for divide by zero
+    if (expression.includes("/ 0")) {
+      Alert.alert("Invalid operation", "Cannot divide by zero");
       return;
     }
 
-    setResult(eval(expression));
-    setCurrentNumber("");
-    // Display the complete expression with the equal sign
-    setExpression(expression + " =");
+    // Ensure the expression does not end with an operator
+    const lastChar = expression.trim().slice(-1);
+    if (["+", "-", "*", "/", "%", " "].includes(lastChar)) {
+      Alert.alert(
+        "Invalid operation",
+        "Expression cannot end with an operator"
+      );
+      return;
+    }
+
+    try {
+      // Evaluate the expression safely
+      const result = eval(expression);
+      setResult(result.toString());
+      setCurrentNumber("");
+
+      // Display the complete expression with the equal sign
+      setExpression(expression + " =");
+    } catch (error) {
+      // Catch and display any syntax errors
+      Alert.alert(
+        "Error",
+        "Invalid expression. Please correct it and try again."
+      );
+    }
   };
 
   const displayExpression = () => {
@@ -176,10 +204,7 @@ export default function MyKeyboard() {
       <View style={Styles.row}>
         <Button title="." onPress={() => handleOperationPress(".")} />
         <Button title="0" onPress={() => handleNumberPress("0")} />
-        <Button
-          title="⌫"
-          onPress={() => setExpression(expression.slice(0, -1))}
-        />
+        <Button title="⌫" onPress={() => handleOperationPress("⌫")} />
         <Button title="=" isBlue onPress={() => getResult()} />
       </View>
     </View>
