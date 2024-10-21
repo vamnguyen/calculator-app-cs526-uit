@@ -28,7 +28,6 @@ export default function MyKeyboard() {
           setResult((prev) => (Number(prev) * -1).toString()); // Change the sign of the number
         }
         break;
-
       case "％":
         if (expression.endsWith("=")) {
           setExpression(result + " % ");
