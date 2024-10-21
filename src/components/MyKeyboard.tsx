@@ -55,7 +55,7 @@ export default function MyKeyboard() {
       case ".":
         const lastChar = expression[expression.length - 1];
         if (!numberButtons.hasOwnProperty(lastChar)) {
-          Alert.alert("Invalid operation", "Please enter a number first");
+          break;
         } else {
           // Last expression is a number
           setExpression(expression + ".");
@@ -90,7 +90,6 @@ export default function MyKeyboard() {
   const getResult = () => {
     // Check if the expression is empty
     if (!expression) {
-      Alert.alert("Invalid operation", "Please enter an expression first");
       return;
     }
 
@@ -215,7 +214,7 @@ export default function MyKeyboard() {
         <Button title="." onPress={() => handleOperationPress(".")} />
         <Button title="0" onPress={() => handleNumberPress("0")} />
         <Button title="⌫" onPress={() => handleOperationPress("⌫")} />
-        <Button title="=" isBlue onPress={() => getResult()} />
+        <Button title="=" isBlue onPress={() =>{if(!expression.endsWith("=")) getResult()}} /> 
       </View>
     </View>
   );
