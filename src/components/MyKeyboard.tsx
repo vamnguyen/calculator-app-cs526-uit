@@ -34,7 +34,7 @@ export default function MyKeyboard() {
         break;
 
       case "=":
-        if (expression.endsWith("=") && result) {
+        if (expression.endsWith("=") || result ) {
           return;
         }
         setResult(eval(expression)); // Calculate the result
@@ -92,11 +92,15 @@ export default function MyKeyboard() {
     } else if (expression.endsWith("=") && result) {
       return;
     }
-
-    setResult(eval(expression));
-    setCurrentNumber("");
-    // Display the complete expression with the equal sign
-    setExpression(expression + " =");
+    
+    try {
+      const calculatedResult = eval(expression);
+      setResult(calculatedResult);
+      setCurrentNumber("");
+      setExpression(expression + " ="); 
+    } catch (error) {
+      Alert.alert("Error", "Invalid expressionnnn");
+    }
   };
 
   const displayExpression = () => {
