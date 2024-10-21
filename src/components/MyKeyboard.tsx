@@ -88,7 +88,7 @@ export default function MyKeyboard() {
   };
 
   const getResult = () => {
-    // Check if expression is empty
+    // Check if the expression is empty
     if (!expression) {
       Alert.alert("Invalid operation", "Please enter an expression first");
       return;
@@ -112,8 +112,18 @@ export default function MyKeyboard() {
 
     try {
       // Evaluate the expression safely
-      const result = eval(expression);
-      setResult(result.toString());
+      let result = eval(expression);
+
+      // Format the result
+      if (Number.isInteger(result)) {
+        // If the result is an integer, just convert it to a string
+        result = result.toString();
+      } else {
+        // If the result is a decimal, limit it to 4 decimal places
+        result = result.toFixed(4).toString();
+      }
+
+      setResult(result);
       setCurrentNumber("");
 
       // Display the complete expression with the equal sign
