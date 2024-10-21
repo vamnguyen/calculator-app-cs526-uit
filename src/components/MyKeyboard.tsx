@@ -3,6 +3,7 @@ import Button from "./Button";
 import { View, Text, Alert } from "react-native";
 import { Styles } from "../styles/GlobalStyles";
 import { myColors } from "../styles/Colors";
+import { operationButtons, numberButtons } from "../constants";
 
 export default function MyKeyboard() {
   const [expression, setExpression] = React.useState("");
@@ -10,29 +11,63 @@ export default function MyKeyboard() {
   const [result, setResult] = React.useState<string | null>(null);
 
   const handleNumberPress = (number: string) => {
-    if (expression.length < 20) {
-      setExpression(expression + number);
-      result ?? setCurrentNumber(number);
-    }
+    setExpression(expression + number);
+    result ?? setCurrentNumber(number);
   };
 
   const handleOperationPress = (operation: string) => {
-    if (operation === "+/-") {
-      if (result) {
-        setResult((prev) => (Number(prev) * -1).toString()); // Change the sign of the number
-      }
-      
-    } 
-    else if(operation==="%"){
-      if(result){
-        setResult((prev)=>(Number(prev)/100).toString());      
-      }
-      
-    }
-    else if (expression.endsWith("=")) {
-      setExpression(result + " " + operation + " ");
-    } else if (expression !== "") {
-      setExpression(expression + " " + operation + " ");
+    switch (operation) {
+      case "+/-":
+        if (!result) {
+          Alert.alert("Invalid operation", "Please calculate the result first");
+        } else {
+          setResult((prev) => (Number(prev) * -1).toString()); // Change the sign of the number
+        }
+        break;
+
+      case "=":
+        if (expression.endsWith("=") && result) {
+          return;
+        }
+        setResult(eval(expression)); // Calculate the result
+        setCurrentNumber(""); // Clear the current number
+        setExpression(expression + " ="); // Display the full expression with "="
+        break;
+
+      case "％":
+        if (expression.endsWith("=")) {
+          setExpression(result + " % ");
+        } else if (expression.endsWith(" ")) {
+          setExpression(expression.slice(0, -2) + "% ");
+        } else if (expression !== "") {
+          setExpression(expression + " % ");
+        }
+        break;
+
+      case "+":
+      case "-":
+      case "*":
+      case "/":
+        if (expression.endsWith("=")) {
+          setExpression(result + " " + operation + " ");
+        } else if (expression.endsWith(" ")) {
+          setExpression(expression.slice(0, -2) + operation + " ");
+        } else if (expression !== "") {
+          setExpression(expression + " " + operation + " ");
+        }
+        break;
+
+      case ".":
+        const lastChar = expression[expression.length - 1];
+        if (!numberButtons.hasOwnProperty(lastChar)) {
+          Alert.alert("Invalid operation", "Please enter a number first");
+        } else {
+          // Last expression is a number
+          setExpression(expression + ".");
+        }
+
+      default:
+        break;
     }
   };
 
@@ -43,10 +78,12 @@ export default function MyKeyboard() {
   };
 
   const getResult = () => {
+    if (expression.endsWith("=") && result) {
+      return;
+    }
     setResult(eval(expression));
     setCurrentNumber("");
     // Display the complete expression with the equal sign
-    
     setExpression(expression + " =");
   };
 
@@ -68,14 +105,14 @@ export default function MyKeyboard() {
           alignSelf: "center",
         }}
       >
-        {expression.endsWith("=") ? displayExpression() : null}
+        {expression ? displayExpression() : null}
 
         <Text style={[Styles.resultNumber, { color: myColors.result }]}>
           {/* Display the result */}
           {result ?? (
             <Text
               style={{
-                fontSize: 50,
+                fontSize: 96,
                 color: myColors.result,
                 fontWeight: "500",
               }}
@@ -103,14 +140,14 @@ export default function MyKeyboard() {
           isGray
           onPress={() => handleOperationPress("+/-")}
         />
-        <Button title="%" isGray onPress={() => handleOperationPress("%")} />
+        <Button title="％" isGray onPress={() => handleOperationPress("％")} />
         <Button title="÷" isBlue onPress={() => handleOperationPress("/")} />
       </View>
       <View style={Styles.row}>
         <Button title="7" onPress={() => handleNumberPress("7")} />
         <Button title="8" onPress={() => handleNumberPress("8")} />
         <Button title="9" onPress={() => handleNumberPress("9")} />
-        <Button title="x" isBlue onPress={() => handleOperationPress("*")} />
+        <Button title="×" isBlue onPress={() => handleOperationPress("*")} />
       </View>
       <View style={Styles.row}>
         <Button title="4" onPress={() => handleNumberPress("4")} />
@@ -125,13 +162,13 @@ export default function MyKeyboard() {
         <Button title="+" isBlue onPress={() => handleOperationPress("+")} />
       </View>
       <View style={Styles.row}>
-        <Button title="." onPress={() => handleNumberPress(".")} />
+        <Button title="." onPress={() => handleOperationPress(".")} />
         <Button title="0" onPress={() => handleNumberPress("0")} />
         <Button
           title="⌫"
           onPress={() => setExpression(expression.slice(0, -1))}
         />
-        <Button title="=" isBlue onPress={() =>{if(!expression.endsWith("=")) getResult()}} />
+        <Button title="=" isBlue onPress={() => getResult()} />
       </View>
     </View>
   );
