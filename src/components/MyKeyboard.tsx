@@ -3,11 +3,10 @@ import Button from "./Button";
 import { View, Text, Alert } from "react-native";
 import { Styles } from "../styles/GlobalStyles";
 import { myColors } from "../styles/Colors";
-import { operationButtons, numberButtons } from "../constants";
+import { numberButtons } from "../constants";
 
 export default function MyKeyboard() {
   const [expression, setExpression] = React.useState("");
-  console.log("🚀 ~ MyKeyboard ~ expression:", expression);
   const [currentNumber, setCurrentNumber] = React.useState("0");
   const [result, setResult] = React.useState<string | null>(null);
 
@@ -17,9 +16,6 @@ export default function MyKeyboard() {
       setExpression(number);
     } else {
       setExpression(expression + number);
-
-      // Handle the case result is null or undefined, display the current number
-      result ?? setCurrentNumber(number);
     }
   };
 
@@ -34,7 +30,7 @@ export default function MyKeyboard() {
         break;
 
       case "=":
-        if (expression.endsWith("=") || result ) {
+        if (expression.endsWith("=") && result) {
           return;
         }
         setResult(eval(expression)); // Calculate the result
@@ -73,6 +69,21 @@ export default function MyKeyboard() {
           // Last expression is a number
           setExpression(expression + ".");
         }
+        break;
+
+      case "⌫":
+        if (expression.endsWith(" ")) {
+          // If the expression ends with an operator followed by a space, remove the last 3 characters (operator and spaces)
+          setExpression(expression.slice(0, -3));
+        } else {
+          // Otherwise, remove the last character
+          setExpression(expression.slice(0, -1));
+        }
+
+        // If the expression becomes empty, reset the current number to "0"
+        if (expression.length <= 1) {
+          clear();
+        }
 
       default:
         break;
@@ -86,21 +97,32 @@ export default function MyKeyboard() {
   };
 
   const getResult = () => {
+    // Check if the expression is empty
     if (!expression) {
       Alert.alert("Invalid operation", "Please enter an expression first");
       return;
-    } else if (expression.endsWith("=") && result) {
+    }
+
+    // Check for divide by zero
+    if (expression.includes("/ 0")) {
+      Alert.alert("Invalid operation", "Cannot divide by zero");
       return;
     }
-    
-    try {
-      const calculatedResult = eval(expression);
-      setResult(calculatedResult);
-      setCurrentNumber("");
-      setExpression(expression + " ="); 
-    } catch (error) {
-      Alert.alert("Error", "Invalid expressionnnn");
+
+    // Ensure the expression does not end with an operator
+    const lastChar = expression.trim().slice(-1);
+    if (["+", "-", "*", "/", "%", " "].includes(lastChar)) {
+      Alert.alert(
+        "Invalid operation",
+        "Expression cannot end with an operator"
+      );
+      return;
     }
+
+    setResult(eval(expression));
+    setCurrentNumber("");
+    // Display the complete expression with the equal sign
+    setExpression(expression + " =");
   };
 
   const displayExpression = () => {
@@ -180,10 +202,7 @@ export default function MyKeyboard() {
       <View style={Styles.row}>
         <Button title="." onPress={() => handleOperationPress(".")} />
         <Button title="0" onPress={() => handleNumberPress("0")} />
-        <Button
-          title="⌫"
-          onPress={() => setExpression(expression.slice(0, -1))}
-        />
+        <Button title="⌫" onPress={() => handleOperationPress("⌫")} />
         <Button title="=" isBlue onPress={() => getResult()} />
       </View>
     </View>
