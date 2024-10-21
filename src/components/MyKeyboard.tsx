@@ -29,15 +29,6 @@ export default function MyKeyboard() {
         }
         break;
 
-      case "=":
-        if (expression.endsWith("=") && result) {
-          return;
-        }
-        setResult(eval(expression)); // Calculate the result
-        setCurrentNumber(""); // Clear the current number
-        setExpression(expression + " ="); // Display the full expression with "="
-        break;
-
       case "％":
         if (expression.endsWith("=")) {
           setExpression(result + " % ");
@@ -119,10 +110,31 @@ export default function MyKeyboard() {
       return;
     }
 
-    setResult(eval(expression));
-    setCurrentNumber("");
-    // Display the complete expression with the equal sign
-    setExpression(expression + " =");
+    try {
+      // Evaluate the expression safely
+      let result = eval(expression);
+
+      // Format the result
+      if (Number.isInteger(result)) {
+        // If the result is an integer, just convert it to a string
+        result = result.toString();
+      } else {
+        // If the result is a decimal, limit it to 4 decimal places
+        result = result.toFixed(4).toString();
+      }
+
+      setResult(result);
+      setCurrentNumber("");
+
+      // Display the complete expression with the equal sign
+      setExpression(expression + " =");
+    } catch (error) {
+      // Catch and display any syntax errors
+      Alert.alert(
+        "Error",
+        "Invalid expression. Please correct it and try again."
+      );
+    }
   };
 
   const displayExpression = () => {
