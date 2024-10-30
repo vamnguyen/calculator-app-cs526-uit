@@ -57,7 +57,7 @@ export const Styles = StyleSheet.create({
     bottom: 50,
   },
   resultNumber: {
-    fontSize: 96,
+    fontSize: 60,
     color: myColors.gray,
     fontWeight: "200",
     alignSelf: "flex-end",

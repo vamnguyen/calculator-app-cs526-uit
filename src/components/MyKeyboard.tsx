@@ -100,7 +100,6 @@ export default function MyKeyboard() {
   const getResult = () => {
     // Check if the expression is empty
     if (!expression) {
-      Alert.alert("Invalid operation", "Please enter an expression first");
       return;
     }
 
