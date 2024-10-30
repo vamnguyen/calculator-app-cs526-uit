@@ -28,15 +28,26 @@ export default function MyKeyboard() {
           setResult((prev) => (Number(prev) * -1).toString()); // Change the sign of the number
         }
         break;
-      case "％":
-        if (expression.endsWith("=")) {
-          setExpression(result + " % ");
-        } else if (expression.endsWith(" ")) {
-          setExpression(expression.slice(0, -2) + "% ");
-        } else if (expression !== "") {
-          setExpression(expression + " % ");
-        }
-        break;
+        case "％":
+          if (result !== null) {
+            // Nếu đã có kết quả, chia tiếp cho 100 khi bấm "%" nhiều lần
+            const percentResult = (parseFloat(result) / 100).toString();
+            setResult(percentResult);
+            setExpression(percentResult + " % ");
+          } else if (expression.endsWith("=")) {
+            // Nếu biểu thức kết thúc bằng "=", chia kết quả thành phần trăm
+            const percentResult = ((parseFloat(result ?? "0")) / 100).toString();
+            setResult(percentResult);
+            setExpression(percentResult + " % ");
+          } else if (expression !== "") {
+            // Nếu biểu thức không rỗng, thêm phần trăm vào cuối biểu thức
+            const currentValue = parseFloat(expression.trim());
+            setExpression(expression + " % ");
+            setResult((currentValue / 100).toString());
+          }
+          break;
+
+
 
       case "+":
       case "-":
@@ -54,7 +65,7 @@ export default function MyKeyboard() {
       case ".":
         const lastChar = expression[expression.length - 1];
         if (!numberButtons.hasOwnProperty(lastChar)) {
-          Alert.alert("Invalid operation", "Please enter a number first");
+          break;
         } else {
           // Last expression is a number
           setExpression(expression + ".");
@@ -214,7 +225,7 @@ export default function MyKeyboard() {
         <Button title="." onPress={() => handleOperationPress(".")} />
         <Button title="0" onPress={() => handleNumberPress("0")} />
         <Button title="⌫" onPress={() => handleOperationPress("⌫")} />
-        <Button title="=" isBlue onPress={() => getResult()} />
+        <Button title="=" isBlue onPress={() => {if(!expression.endsWith("="))getResult()}} />
       </View>
     </View>
   );
