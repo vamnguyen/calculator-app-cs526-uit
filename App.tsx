@@ -1,45 +1,22 @@
-import { useState } from "react";
-import { SafeAreaView, StyleSheet, Switch, Text, View } from "react-native";
-import { myColors } from "./src/styles/Colors";
-import { ThemeContext } from "./src/context/ThemeContext";
-import MyKeyboard from "./src/components/MyKeyboard";
+import HomeScreen from "./src/components/HomeScreen";
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { NavigationContainer } from '@react-navigation/native';
+import HistoryScreen from "./src/components/HistoryScreen";
+import { HistoryProvider } from './src/context/HistoryContext';
 
 export default function App() {
-  const [theme, setTheme] = useState("light");
+  const Drawer = createDrawerNavigator();
   return (
-    <ThemeContext.Provider value={theme}>
-      <SafeAreaView
-        style={
-          theme === "light"
-            ? styles.container
-            : [styles.container, { backgroundColor: "black" }]
-        }
-      >
-        <View style={{ marginTop: 35, display: "flex", alignItems: "center" }}>
-          <Text
-            style={{
-              color: `${theme === "light" ? myColors.dark : myColors.light}`,
-              fontSize: 30,
-            }}
-          >
-            {theme === "light" ? "Light Theme" : "Dark Theme"}
-          </Text>
-          <Switch
-            value={theme === "dark"}
-            onValueChange={() => setTheme(theme === "light" ? "dark" : "light")}
-          />
-        </View>
-        <MyKeyboard />
-      </SafeAreaView>
-    </ThemeContext.Provider>
+    <NavigationContainer>
+      <HistoryProvider>
+      <Drawer.Navigator>
+        <Drawer.Screen name="Home" component={HomeScreen} />
+        <Drawer.Screen name="History" component={HistoryScreen} />
+      </Drawer.Navigator>
+      </HistoryProvider>
+    </NavigationContainer>
+      
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: myColors.light,
-    alignItems: "center",
-    justifyContent: "flex-start",
-  },
-});
+

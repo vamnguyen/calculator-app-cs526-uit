@@ -4,11 +4,14 @@ import { View, Text, Alert } from "react-native";
 import { Styles } from "../styles/GlobalStyles";
 import { myColors } from "../styles/Colors";
 import { numberButtons } from "../constants";
+import { useHistory } from '../context/HistoryContext';
 
 export default function MyKeyboard() {
   const [expression, setExpression] = React.useState("");
   const [currentNumber, setCurrentNumber] = React.useState("0");
   const [result, setResult] = React.useState<string | null>(null);
+
+  
 
   const handleNumberPress = (number: string) => {
     if (expression.endsWith("=")) {
@@ -97,6 +100,9 @@ export default function MyKeyboard() {
     setResult(null);
   };
 
+  //const [listHistory,setListHistory] = React.useState<string[]>([]);
+  const { addToHistory } = useHistory();
+
   const getResult = () => {
     // Check if the expression is empty
     if (!expression) {
@@ -137,6 +143,8 @@ export default function MyKeyboard() {
 
       // Display the complete expression with the equal sign
       setExpression(expression + " =");
+      //console.log(expression+' = '+result);
+      addToHistory(expression+' = '+result);
     } catch (error) {
       // Catch and display any syntax errors
       Alert.alert(
@@ -224,7 +232,14 @@ export default function MyKeyboard() {
         <Button title="." onPress={() => handleOperationPress(".")} />
         <Button title="0" onPress={() => handleNumberPress("0")} />
         <Button title="⌫" onPress={() => handleOperationPress("⌫")} />
-        <Button title="=" isBlue onPress={() => {if(!expression.endsWith("="))getResult()}} />
+        <Button title="=" isBlue onPress={() => {
+            if(!expression.endsWith("=")){
+                getResult();
+                
+            };
+            }
+          } 
+        />
       </View>
     </View>
   );
