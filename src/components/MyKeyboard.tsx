@@ -11,10 +11,15 @@ export default function MyKeyboard() {
   const [currentNumber, setCurrentNumber] = React.useState("0");
   const [result, setResult] = React.useState<string | null>(null);
 
+  const { addToHistory } = useHistory();
   
-
   const handleNumberPress = (number: string) => {
-    if (expression.endsWith("=")) {
+    
+    if (expression.trim().endsWith("%")) {
+      Alert.alert("Invalid input", "Cannot enter numbers after a percentage symbol '%'.");
+      return; // Ngừng thực hiện nếu điều kiện trên đúng
+    }
+    else if (expression.endsWith("=")) {
       // If the expression ends with "=", clear the expression and start a new one
       setExpression(number);
     } else {
@@ -23,6 +28,7 @@ export default function MyKeyboard() {
   };
 
   const handleOperationPress = (operation: string) => {
+    
     switch (operation) {
       case "+/-":
         if (!result) {
@@ -31,27 +37,28 @@ export default function MyKeyboard() {
           setResult((prev) => (Number(prev) * -1).toString()); // Change the sign of the number
         }
         break;
-        case "％":
-          if (result !== null) {
-            // Nếu đã có kết quả, chia tiếp cho 100 khi bấm "%" nhiều lần
-            const percentResult = (parseFloat(result) / 100).toString();
-            setResult(percentResult);
-            setExpression(percentResult + " % ");
-          } else if (expression.endsWith("=")) {
-            // Nếu biểu thức kết thúc bằng "=", chia kết quả thành phần trăm
-            const percentResult = ((parseFloat(result ?? "0")) / 100).toString();
-            setResult(percentResult);
-            setExpression(percentResult + " % ");
-          } else if (expression !== "") {
-            // Nếu biểu thức không rỗng, thêm phần trăm vào cuối biểu thức
-            const currentValue = parseFloat(expression.trim());
-            setExpression(expression + " % ");
-            setResult((currentValue / 100).toString());
-          }
+      case "％":
+        if(expression === "")
           break;
-
-
-
+        if(result !== null) {
+          const percentResult = (parseFloat(result) / 100);
+          const formattedResult = percentResult <= 0.001 ? percentResult.toExponential(3) : percentResult.toString();
+          setResult(formattedResult); 
+          setExpression(formattedResult + " % ");
+          addToHistory(result + " % = " + formattedResult);
+        }
+        else {
+          //Nếu biểu thức không rỗng, thêm phần trăm vào cuối biểu thức và chuyển sang dạng ký hiệu khoa học
+          const currentValue = parseFloat(expression.trim());
+          const percentResult = (currentValue / 100);
+          const formattedResult = percentResult <= 0.001 ? percentResult.toExponential(3) : percentResult.toString();
+          addToHistory(expression + " % = " + formattedResult);
+          setResult(formattedResult);
+          setExpression(formattedResult + " % ");
+        }
+        
+        break;
+        
       case "+":
       case "-":
       case "*":
@@ -100,8 +107,8 @@ export default function MyKeyboard() {
     setResult(null);
   };
 
-  //const [listHistory,setListHistory] = React.useState<string[]>([]);
-  const { addToHistory } = useHistory();
+ 
+
 
   const getResult = () => {
     // Check if the expression is empty
@@ -117,7 +124,7 @@ export default function MyKeyboard() {
 
     // Ensure the expression does not end with an operator
     const lastChar = expression.trim().slice(-1);
-    if (["+", "-", "*", "/", "%", " "].includes(lastChar)) {
+    if (["+", "-", "*", "/", " "].includes(lastChar)) {
       Alert.alert(
         "Invalid operation",
         "Expression cannot end with an operator"
@@ -182,6 +189,8 @@ export default function MyKeyboard() {
                 fontSize: 96,
                 color: myColors.result,
                 fontWeight: "500",
+                paddingVertical:5,
+                paddingTop:10
               }}
             >
               {result}
@@ -189,13 +198,13 @@ export default function MyKeyboard() {
           )}
 
           {/* Display the result of current expression */}
-          {!result && expression && !expression.endsWith(" ") ? (
+          {/* {!result && expression && !expression.endsWith(" ") ? (
             <Text style={Styles.resultNumber}>{eval(expression)}</Text>
           ) : (
             currentNumber && (
               <Text style={Styles.resultNumber}>{currentNumber}</Text>
             )
-          )}
+          )} */}
         </Text>
       </View>
 
