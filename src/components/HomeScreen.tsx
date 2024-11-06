@@ -15,14 +15,14 @@ const HomeScreen = () => {
             : [styles.container, { backgroundColor: "black" }]
         }
       >
-        <View style={{ marginTop: 35, display: "flex", alignItems: "center" }}>
+        <View style={{ marginTop: 15, display: "flex", alignItems: "center"}}>
           <Text
             style={{
               color: `${theme === "light" ? myColors.dark : myColors.light}`,
-              fontSize: 30,
+              fontSize: 20,
             }}
           >
-            {theme === "light" ? "Light Theme" : "Dark Theme"}
+            {theme === "light" ? "Light Theme " : "Dark Theme "}
           </Text>
           <Switch
             value={theme === "dark"}

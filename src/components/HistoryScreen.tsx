@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 20,
+    height: '20%'
   },
   historyItem: {
     padding: 10,
