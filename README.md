@@ -31,5 +31,5 @@ npm start or npx expo start
 | MSSV       | Họ và Tên            | Email                  |
 | ---------- | -------------------- | ---------------------- |
 | `22520880` | Nguyễn Viết Anh Minh | 22520880@gm.uit.edu.vn |
-| `22520717` | Kiệt Huỳnh           | 22520717@gm.uit.edu.vn |
+| `22520717` | Huỳnh Chấn Kiệt      | 22520717@gm.uit.edu.vn |
 | `22520791` | Nguyễn Minh Lộc      | 22520791@gm.uit.edu.vn |
